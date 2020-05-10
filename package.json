@@ -1,0 +1,16 @@
+{
+  "name": "flobot",
+  "version": "1.0.0",
+  "description": "Chat Bot for twitch.tv/rheyces",
+  "main": "bot.js",
+  "dependencies": {
+    "tmi.js": "^1.5.0",
+    "mysql": "2.18.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tim Markwardt",
+  "license": "ISC"
+}
