@@ -1,9 +1,10 @@
-const tmi = require('tmi.js');
+var tmi = require('tmi.js');
 var mysql = require('mysql');
+var gamble = require('./gamble');
 
 process.env.BOT_USERNAME = 'Rhebot';
 process.env.OAUTH_TOKEN = 'oauth:njhrse3h7ojlsxe7bbgj08ojltfzi8';
-process.env.CHANNEL_NAME = 'rheyces';
+process.env.CHANNEL_NAME = 'timmelpimmel'; //'rheyces';
 
 // Define configuration options
 const opts = {
@@ -25,6 +26,14 @@ const client = new tmi.client(opts);
 client.on('message', onMessageHandler);
 
 client.on('connected', onConnectedHandler);
+
+client.on('notice', onNoticeHandler);
+
+client.on('join', onNamesHandler);
+
+client.on('part', onNamesHandler);
+
+client.on('raw_message', onRawMessageHandler);
 
 
 // Connect to Twitch:
@@ -55,22 +64,20 @@ function onMessageHandler(target, context, msg, self) {
   } // Ignore messages from the bot
 
 
-  // Remove whitespace from chat message
+  // Check if the message is a command
 
   if (!msg.startsWith('!')) {
     return;
   }
 
-  const commandName = msg.trim();
+  // Remove whitespace from chat message
 
-  console.log(commandName);
+  const commandName = msg.trim();
 
 
   // If the command is known, let's execute it
 
-  var commands = ['!dice', '!hi', '!hey'];
-
-  if (commandName.toLowerCase().startsWith(commands[0])) {
+  if (commandName.toLowerCase().startsWith('!dice')) {
 
     const num = rollDice();
 
@@ -78,19 +85,17 @@ function onMessageHandler(target, context, msg, self) {
 
     console.log(`* Executed ${commandName} command`);
 
-  } else if (commandName.toLowerCase().startsWith(commands[1])) {
+  } else if (commandName.toLowerCase().startsWith('!hi')) {
 
     client.say(target, `Hi!`);
 
     console.log(`* Executed ${commandName} command`);
 
+  } else if (commandName.toLowerCase().startsWith('!hey')) {
+
+    client.say(target, `Hey @${referenceUser(context)}!`);
+    client.raw('CAP REQ :twitch.tv/commands');
     console.log(context);
-
-  } else if (commandName.toLowerCase().startsWith(commands[2])) {
-
-    client.say(target, `Hey!`);
-
-    console.log(`* Executed ${commandName} command`);
 
   } else {
 
@@ -110,6 +115,13 @@ function rollDice() {
 
 }
 
+function referenceUser(context) {
+  var displayName = context['display-name'];
+  if (displayName != null && displayName === "")
+    return context.username;
+  return displayName;
+}
+
 // Called every time the bot connects to Twitch chat
 
 function onConnectedHandler(addr, port) {
@@ -117,3 +129,24 @@ function onConnectedHandler(addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
 
 }
+
+function onNoticeHandler(channel, msgid, msg) {
+  //console.log(channel);
+  // console.log(msgid);
+  //console.log(msg);
+}
+
+function onNamesHandler(channel, msgid, msg) {
+  //console.log(channel);
+  //console.log(msgid);
+  //console.log(msg);
+}
+
+function onRawMessageHandler(data, pagination) {
+  console.log(data);
+}
+
+// /uptime für live/nicht live
+// /ban, etc. werden mit privmsg gesendet: https://dev.twitch.tv/docs/irc/guide#invalid-irc-commands
+// console.log(client.raw(`PRIVMSG ${target} :This is a sample message`)); 
+// --> listen to "raw_message"
